@@ -1,0 +1,43 @@
+{
+  "name": "toy-chat",
+  "version": "1.0.0",
+  "description": "Simple text, voice, and video chat app",
+  "main": "src/main/main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win",
+    "build:publish": "electron-builder --win --publish always"
+  },
+  "author": "TK",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "electron-updater": "^6.1.7",
+    "livekit-client": "^1.15.4"
+  },
+  "build": {
+    "appId": "com.toy.chat",
+    "productName": "Toy Chat",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": true,
+      "allowToChangeInstallationDirectory": false,
+      "deleteAppDataOnUninstall": false
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "TK",
+      "repo": "toy_2"
+    }
+  }
+}

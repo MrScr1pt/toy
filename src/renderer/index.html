@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.supabase.co wss://*.livekit.cloud; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co wss://*.supabase.co wss://*.livekit.cloud https://*.livekit.cloud; media-src 'self' blob:; img-src 'self' data: blob:;">
+  <title>Toy Chat</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Login Screen -->
+  <div id="login-screen" class="screen active">
+    <div class="login-container">
+      <h1>🎮 Toy Chat</h1>
+      <p>Enter your username to join the chat room</p>
+      <input type="text" id="username-input" placeholder="Enter username..." maxlength="20">
+      <input type="text" id="room-input" placeholder="Room name (default: general)" maxlength="30">
+      <button id="join-btn">Join Room</button>
+    </div>
+  </div>
+
+  <!-- Main Chat Screen -->
+  <div id="chat-screen" class="screen">
+    <div class="app-container">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="room-info">
+          <h2 id="room-name">Room: general</h2>
+          <p id="user-count">0 online</p>
+        </div>
+        
+        <div class="users-list">
+          <h3>Online Users</h3>
+          <ul id="users-list"></ul>
+        </div>
+        
+        <div class="user-info">
+          <span id="current-user">Username</span>
+          <button id="leave-btn" title="Leave Room">🚪</button>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <!-- Video Grid -->
+        <div id="video-container" class="video-container hidden">
+          <div id="video-grid" class="video-grid"></div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-area">
+          <div id="messages" class="messages"></div>
+          
+          <div class="message-input-container">
+            <input type="text" id="message-input" placeholder="Type a message...">
+            <button id="send-btn">Send</button>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+          <button id="mic-btn" class="control-btn" title="Toggle Microphone">
+            🎤
+          </button>
+          <button id="camera-btn" class="control-btn" title="Toggle Camera">
+            📷
+          </button>
+          <button id="screen-btn" class="control-btn" title="Share Screen">
+            🖥️
+          </button>
+          <button id="settings-btn" class="control-btn" title="Device Settings">
+            ⚙️
+          </button>
+          <button id="call-btn" class="control-btn call-btn" title="Join Voice/Video">
+            📞
+          </button>
+          <button id="hangup-btn" class="control-btn hangup-btn hidden" title="Leave Call">
+            📵
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen Picker Modal -->
+  <div id="screen-picker-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Choose what to share</h2>
+      <div id="screen-sources" class="screen-sources"></div>
+      <button id="cancel-screen-picker" class="modal-cancel">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2>⚙️ Device Settings</h2>
+      
+      <div class="setting-group">
+        <label>🎤 Microphone</label>
+        <select id="mic-select"></select>
+      </div>
+      
+      <div class="setting-group">
+        <label>🔊 Speaker</label>
+        <select id="speaker-select"></select>
+      </div>
+      
+      <div class="setting-group">
+        <label>📷 Camera</label>
+        <select id="camera-select"></select>
+      </div>
+      
+      <div class="modal-buttons">
+        <button id="save-settings" class="modal-save">Save</button>
+        <button id="cancel-settings" class="modal-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load dependencies from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/livekit-client@1.15.4/dist/livekit-client.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
