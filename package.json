@@ -1,6 +1,6 @@
 {
   "name": "toy-chat",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "Simple text, voice, and video chat app",
   "main": "src/main/main.js",
   "scripts": {
@@ -36,8 +36,9 @@
     },
     "publish": {
       "provider": "github",
-      "owner": "TK",
-      "repo": "toy_2"
+      "owner": "MrScr1pt",
+      "repo": "toy",
+      "releaseType": "release"
     }
   }
 }

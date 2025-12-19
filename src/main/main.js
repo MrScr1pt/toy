@@ -1,9 +1,11 @@
-const { app, BrowserWindow, ipcMain, desktopCapturer, session, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, desktopCapturer, session, Menu, dialog } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const path = require('path');
 
 let mainWindow;
 let updateWindow;
+let isInitialCheck = true; // Track if this is the initial update check on launch
+let backgroundUpdateAvailable = false;
 
 // Configure auto-updater
 autoUpdater.autoDownload = true;
@@ -66,22 +68,50 @@ autoUpdater.on('checking-for-update', () => {
 
 autoUpdater.on('update-available', (info) => {
   console.log('Update available:', info.version);
-  if (updateWindow) {
-    updateWindow.webContents.send('update-status', `Update available: v${info.version}`);
-    updateWindow.webContents.send('update-available', true);
+  
+  if (isInitialCheck) {
+    // First launch - show update window and download
+    if (updateWindow) {
+      updateWindow.webContents.send('update-status', `Update available: v${info.version}`);
+      updateWindow.webContents.send('update-available', true);
+    }
+  } else {
+    // Background check while app is running - show dialog forcing restart
+    backgroundUpdateAvailable = true;
+    if (mainWindow) {
+      dialog.showMessageBox(mainWindow, {
+        type: 'info',
+        title: 'Update Available',
+        message: `A new version (v${info.version}) is available!`,
+        detail: 'The app will restart to apply the update.',
+        buttons: ['Restart Now'],
+        defaultId: 0,
+        noLink: true
+      }).then(() => {
+        // Force restart when update is downloaded
+        autoUpdater.on('update-downloaded', () => {
+          autoUpdater.quitAndInstall(false, true);
+        });
+      });
+    }
   }
 });
 
 autoUpdater.on('update-not-available', () => {
   console.log('No updates available');
-  // Close update window and show main window
-  if (updateWindow) {
-    updateWindow.close();
-    updateWindow = null;
+  
+  if (isInitialCheck) {
+    // First launch - close update window and show main window
+    if (updateWindow) {
+      updateWindow.close();
+      updateWindow = null;
+    }
+    if (mainWindow) {
+      mainWindow.show();
+    }
+    isInitialCheck = false;
   }
-  if (mainWindow) {
-    mainWindow.show();
-  }
+  // Background checks: no action needed if no update
 });
 
 autoUpdater.on('download-progress', (progress) => {
@@ -134,6 +164,15 @@ app.whenReady().then(() => {
   // Check for updates (only in production)
   if (app.isPackaged) {
     autoUpdater.checkForUpdates();
+    
+    // Periodic background update check every 5 minutes
+    setInterval(() => {
+      isInitialCheck = false;
+      if (!backgroundUpdateAvailable) {
+        console.log('Background update check...');
+        autoUpdater.checkForUpdates();
+      }
+    }, 5 * 60 * 1000); // 5 minutes
   } else {
     // In development, skip update check and show main window
     if (updateWindow) {

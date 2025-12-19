@@ -79,6 +79,12 @@ body {
   background: #ff6b6b;
 }
 
+.version-display {
+  margin-top: 30px;
+  color: #555;
+  font-size: 12px;
+}
+
 /* Main App Container */
 .app-container {
   display: flex;

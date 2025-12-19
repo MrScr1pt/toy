@@ -2,6 +2,14 @@
 // TOY CHAT - Main Application
 // ==========================================
 
+// Display app version
+if (window.electronAPI) {
+  window.electronAPI.getAppVersion().then(version => {
+    const versionEl = document.getElementById('version-display');
+    if (versionEl) versionEl.textContent = `v${version}`;
+  });
+}
+
 // Configuration
 const SUPABASE_URL = 'https://wnyxdfoydxsbkhtujsxm.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndueXhkZm95ZHhzYmtodHVqc3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NjMyMzgsImV4cCI6MjA4MTAzOTIzOH0.S062HvJChSfAOdwErBQYN1NCz6LbaxkSFuR2RJjpMEk';
