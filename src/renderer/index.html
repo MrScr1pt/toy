@@ -8,14 +8,58 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Login Screen -->
-  <div id="login-screen" class="screen active">
-    <div class="login-container">
-      <h1>🎮 Toy Chat</h1>
-      <p>Enter your username to join the chat room</p>
-      <input type="text" id="username-input" placeholder="Enter username..." maxlength="20">
-      <input type="text" id="room-input" placeholder="Room name (default: general)" maxlength="30">
-      <button id="join-btn">Join Room</button>
+  <!-- Auth Screen -->
+  <div id="auth-screen" class="screen active">
+    <div class="auth-container">
+      <div class="auth-header">
+        <h1 class="auth-logo">TOY</h1>
+        <p class="auth-tagline">Enter the realm of the steppe</p>
+      </div>
+      
+      <!-- Auth Tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Sign In</button>
+        <button class="auth-tab" data-tab="signup">Sign Up</button>
+      </div>
+      
+      <!-- Login Form -->
+      <form id="login-form" class="auth-form active">
+        <div class="form-group">
+          <label for="login-email">Email</label>
+          <input type="email" id="login-email" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="auth-submit-btn">Sign In</button>
+        <div id="login-error" class="auth-error"></div>
+      </form>
+      
+      <!-- Signup Form -->
+      <form id="signup-form" class="auth-form">
+        <div class="form-group">
+          <label for="signup-username">Username</label>
+          <input type="text" id="signup-username" placeholder="Choose a username" minlength="3" maxlength="20" required>
+          <span class="form-hint">3-20 characters, letters and numbers only</span>
+        </div>
+        <div class="form-group">
+          <label for="signup-email">Email</label>
+          <input type="email" id="signup-email" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label for="signup-password">Password</label>
+          <input type="password" id="signup-password" placeholder="••••••••" minlength="6" required>
+          <span class="form-hint">At least 6 characters</span>
+        </div>
+        <div class="form-group">
+          <label for="signup-confirm">Confirm Password</label>
+          <input type="password" id="signup-confirm" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="auth-submit-btn">Create Account</button>
+        <div id="signup-error" class="auth-error"></div>
+      </form>
+      
       <div class="version-display" id="version-display">v1.0.0</div>
     </div>
   </div>
@@ -25,24 +69,75 @@
     <div class="app-container">
       <!-- Sidebar -->
       <div class="sidebar">
-        <div class="room-info">
-          <h2 id="room-name">Room: general</h2>
-          <p id="user-count">0 online</p>
+        <!-- Hidden element for JS compatibility -->
+        <span id="room-name" class="hidden"></span>
+        
+        <!-- Room Switcher -->
+        <div class="room-switcher">
+          <div class="room-switcher-header">
+            <span class="room-switcher-label">CHANNELS</span>
+            <button id="add-room-btn" class="add-room-btn" title="Create Room">+</button>
+          </div>
+          <div id="room-list" class="room-list">
+            <div class="room-item active" data-room="general">
+              <span class="room-icon">#</span>
+              <span class="room-name">general</span>
+            </div>
+            <div class="room-item" data-room="random">
+              <span class="room-icon">#</span>
+              <span class="room-name">random</span>
+            </div>
+            <div class="room-item" data-room="gaming">
+              <span class="room-icon">#</span>
+              <span class="room-name">gaming</span>
+            </div>
+          </div>
         </div>
         
+        <div class="sidebar-divider"></div>
+        
+        <!-- Direct Messages -->
+        <div class="dm-section">
+          <div class="dm-section-header">
+            <span class="dm-section-label">DIRECT MESSAGES</span>
+          </div>
+          <div id="dm-list" class="dm-list"></div>
+        </div>
+        
+        <div class="sidebar-divider"></div>
+        
         <div class="users-list">
-          <h3>Online Users</h3>
+          <div class="users-list-header">
+            <h3>ONLINE</h3>
+            <span id="user-count" class="user-count-badge">0</span>
+          </div>
           <ul id="users-list"></ul>
         </div>
         
         <div class="user-info">
-          <span id="current-user">Username</span>
-          <button id="leave-btn" title="Leave Room">🚪</button>
+          <button id="profile-btn" class="user-profile-trigger" title="View Profile">
+            <div class="user-avatar-small" id="user-avatar-small">U</div>
+            <span id="current-user">Username</span>
+          </button>
+          <button id="logout-btn" class="btn btn-icon btn-ghost" title="Log Out">🚪</button>
         </div>
       </div>
 
       <!-- Main Content -->
       <div class="main-content">
+        <!-- Voice Status Bar -->
+        <div id="voice-status-bar" class="voice-status-bar">
+          <div class="voice-status-info">
+            <div class="voice-status-indicator"></div>
+            <span class="voice-status-text">Voice Connected</span>
+            <span class="voice-status-room" id="voice-room-name">/ general</span>
+          </div>
+          <div class="voice-status-actions">
+            <button id="voice-deafen-btn" title="Deafen">🔇</button>
+            <button id="voice-disconnect-btn" title="Disconnect">📵</button>
+          </div>
+        </div>
+
         <!-- Video Grid -->
         <div id="video-container" class="video-container hidden">
           <div id="video-grid" class="video-grid"></div>
@@ -50,11 +145,55 @@
 
         <!-- Chat Area -->
         <div class="chat-area">
+          <!-- Chat Header with Search -->
+          <div class="chat-header">
+            <div class="chat-header-info">
+              <span class="chat-header-icon">#</span>
+              <span class="chat-header-name">general</span>
+            </div>
+            <div class="chat-header-actions">
+              <button id="search-toggle-btn" class="chat-header-btn" title="Search Messages">🔍</button>
+              <button id="pin-toggle-btn" class="chat-header-btn" title="Pinned Messages">📌</button>
+            </div>
+          </div>
+          
+          <!-- Search Bar (hidden by default) -->
+          <div id="search-bar" class="search-bar hidden">
+            <input type="text" id="search-input" placeholder="Search messages...">
+            <div class="search-results-info">
+              <span id="search-results-count"></span>
+              <button id="search-prev" class="search-nav-btn" title="Previous">▲</button>
+              <button id="search-next" class="search-nav-btn" title="Next">▼</button>
+            </div>
+            <button id="search-close" class="search-close-btn" title="Close">✕</button>
+          </div>
+          
           <div id="messages" class="messages"></div>
           
           <div class="message-input-container">
+            <div class="emoji-picker-container">
+              <button id="emoji-btn" class="emoji-btn" title="Add Emoji">😊</button>
+              <div id="emoji-picker" class="emoji-picker hidden">
+                <div class="emoji-picker-header">
+                  <button class="emoji-category-btn active" data-category="recent" title="Recent">🕐</button>
+                  <button class="emoji-category-btn" data-category="smileys" title="Smileys">😀</button>
+                  <button class="emoji-category-btn" data-category="people" title="People">👋</button>
+                  <button class="emoji-category-btn" data-category="nature" title="Nature">🌿</button>
+                  <button class="emoji-category-btn" data-category="food" title="Food">🍕</button>
+                  <button class="emoji-category-btn" data-category="activities" title="Activities">⚽</button>
+                  <button class="emoji-category-btn" data-category="objects" title="Objects">💡</button>
+                  <button class="emoji-category-btn" data-category="symbols" title="Symbols">❤️</button>
+                </div>
+                <div class="emoji-picker-search">
+                  <input type="text" id="emoji-search" placeholder="Search emoji...">
+                </div>
+                <div id="emoji-grid" class="emoji-grid"></div>
+              </div>
+            </div>
+            <button id="image-btn" class="image-btn" title="Share Image">📷</button>
+            <input type="file" id="image-input" accept="image/*" hidden>
             <input type="text" id="message-input" placeholder="Type a message...">
-            <button id="send-btn">Send</button>
+            <button id="send-btn" class="btn btn-primary">Send</button>
           </div>
         </div>
 
@@ -93,31 +232,168 @@
   </div>
 
   <!-- Settings Modal -->
-  <div id="settings-modal" class="modal hidden">
+  <div id="settings-modal" class="modal hidden settings-modal">
     <div class="modal-content">
       <h2>⚙️ Device Settings</h2>
       
-      <div class="setting-group">
-        <label>🎤 Microphone</label>
-        <select id="mic-select"></select>
+      <div class="settings-tabs">
+        <button class="settings-tab active" data-tab="audio">Audio</button>
+        <button class="settings-tab" data-tab="video">Video</button>
+        <button class="settings-tab" data-tab="appearance">Appearance</button>
       </div>
       
-      <div class="setting-group">
-        <label>🔊 Speaker</label>
-        <select id="speaker-select"></select>
+      <div class="settings-section active" data-section="audio">
+        <div class="setting-group">
+          <label>🎤 Microphone</label>
+          <select id="mic-select" class="select"></select>
+        </div>
+        
+        <div class="setting-group">
+          <label>🔊 Speaker</label>
+          <select id="speaker-select" class="select"></select>
+        </div>
+        
+        <div class="setting-row">
+          <div class="setting-label">
+            <span>Input Volume</span>
+            <small>Adjust microphone sensitivity</small>
+          </div>
+          <input type="range" class="volume-slider" min="0" max="100" value="80">
+        </div>
+        
+        <div class="setting-row">
+          <div class="setting-label">
+            <span>Noise Suppression</span>
+            <small>Reduce background noise</small>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
       </div>
       
-      <div class="setting-group">
-        <label>📷 Camera</label>
-        <select id="camera-select"></select>
+      <div class="settings-section" data-section="video">
+        <div class="setting-group">
+          <label>📷 Camera</label>
+          <select id="camera-select" class="select"></select>
+        </div>
+        
+        <div class="setting-row">
+          <div class="setting-label">
+            <span>Mirror Video</span>
+            <small>Flip your video horizontally</small>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        
+        <div class="setting-row">
+          <div class="setting-label">
+            <span>HD Video</span>
+            <small>Use higher quality (more bandwidth)</small>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+      
+      <div class="settings-section" data-section="appearance">
+        <div class="setting-row">
+          <div class="setting-label">
+            <span>Compact Mode</span>
+            <small>Reduce spacing in messages</small>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        
+        <div class="setting-row">
+          <div class="setting-label">
+            <span>Show Timestamps</span>
+            <small>Display time on messages</small>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
       </div>
       
       <div class="modal-buttons">
-        <button id="save-settings" class="modal-save">Save</button>
-        <button id="cancel-settings" class="modal-cancel">Cancel</button>
+        <button id="save-settings" class="btn btn-primary">Save</button>
+        <button id="cancel-settings" class="btn btn-ghost">Cancel</button>
       </div>
     </div>
   </div>
+
+  <!-- User Profile Modal -->
+  <div id="profile-modal" class="modal hidden profile-modal">
+    <div class="modal-content">
+      <div class="profile-header">
+        <div class="profile-avatar-container">
+          <div class="profile-avatar" id="profile-avatar">
+            <span id="profile-initial">U</span>
+          </div>
+          <button class="profile-avatar-edit" title="Change Avatar">✏️</button>
+        </div>
+      </div>
+      
+      <div class="profile-body">
+        <h2 class="profile-username" id="profile-username">Username</h2>
+        <div class="profile-status-badge">
+          <span class="profile-status-dot online"></span>
+          <span>Online</span>
+        </div>
+        
+        <div class="profile-stats">
+          <div class="profile-stat">
+            <span class="profile-stat-value" id="profile-messages">0</span>
+            <span class="profile-stat-label">Messages</span>
+          </div>
+          <div class="profile-stat">
+            <span class="profile-stat-value" id="profile-calls">0</span>
+            <span class="profile-stat-label">Calls</span>
+          </div>
+          <div class="profile-stat">
+            <span class="profile-stat-value" id="profile-rooms">1</span>
+            <span class="profile-stat-label">Rooms</span>
+          </div>
+        </div>
+        
+        <div class="profile-info">
+          <div class="profile-info-item">
+            <div class="profile-info-icon">📅</div>
+            <div class="profile-info-content">
+              <div class="profile-info-label">Joined</div>
+              <div class="profile-info-value" id="profile-joined">Today</div>
+            </div>
+          </div>
+          <div class="profile-info-item">
+            <div class="profile-info-icon">🏠</div>
+            <div class="profile-info-content">
+              <div class="profile-info-label">Current Room</div>
+              <div class="profile-info-value" id="profile-room">general</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="profile-actions">
+        <button class="btn btn-secondary" id="edit-profile-btn">Edit Profile</button>
+        <button class="btn btn-ghost" id="close-profile-btn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications Container -->
+  <div id="toast-container" class="toast-container"></div>
 
   <!-- Load dependencies from CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

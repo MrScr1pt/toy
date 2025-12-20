@@ -1,6 +1,6 @@
 {
   "name": "toy-chat",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Simple text, voice, and video chat app",
   "main": "src/main/main.js",
   "scripts": {

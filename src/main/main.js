@@ -2,10 +2,21 @@ const { app, BrowserWindow, ipcMain, desktopCapturer, session, Menu, dialog } = 
 const { autoUpdater } = require('electron-updater');
 const path = require('path');
 
+// Register custom protocol for auth callbacks
+const PROTOCOL = 'toy';
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient(PROTOCOL, process.execPath, [path.resolve(process.argv[1])]);
+  }
+} else {
+  app.setAsDefaultProtocolClient(PROTOCOL);
+}
+
 let mainWindow;
 let updateWindow;
 let isInitialCheck = true; // Track if this is the initial update check on launch
 let backgroundUpdateAvailable = false;
+let authCallbackUrl = null; // Store auth callback URL
 
 // Configure auto-updater
 autoUpdater.autoDownload = true;
@@ -198,4 +209,53 @@ app.on('activate', () => {
 // Handle any IPC messages if needed
 ipcMain.handle('get-app-version', () => {
   return app.getVersion();
+});
+// Handle deep link on Windows/Linux (second instance)
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on('second-instance', (event, commandLine) => {
+    // Someone tried to run a second instance, we should focus our window
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.focus();
+    }
+    
+    // Handle the protocol URL (Windows/Linux)
+    const url = commandLine.find(arg => arg.startsWith(`${PROTOCOL}://`));
+    if (url) {
+      handleAuthCallback(url);
+    }
+  });
+}
+
+// Handle deep link on macOS
+app.on('open-url', (event, url) => {
+  event.preventDefault();
+  handleAuthCallback(url);
+});
+
+// Process auth callback URL
+function handleAuthCallback(url) {
+  console.log('Auth callback received:', url);
+  
+  // Extract tokens from URL
+  // URL format: toy://auth#access_token=xxx&refresh_token=xxx&...
+  if (mainWindow) {
+    mainWindow.webContents.send('auth-callback', url);
+    mainWindow.show();
+    mainWindow.focus();
+  } else {
+    // Store for later if window isn't ready yet
+    authCallbackUrl = url;
+  }
+}
+
+// Send stored auth callback when renderer is ready
+ipcMain.handle('get-auth-callback', () => {
+  const url = authCallbackUrl;
+  authCallbackUrl = null;
+  return url;
 });
