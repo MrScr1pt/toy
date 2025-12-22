@@ -25,10 +25,11 @@
   }
 })();
 
-// Configuration
-const SUPABASE_URL = 'https://wnyxdfoydxsbkhtujsxm.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndueXhkZm95ZHhzYmtodHVqc3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NjMyMzgsImV4cCI6MjA4MTAzOTIzOH0.S062HvJChSfAOdwErBQYN1NCz6LbaxkSFuR2RJjpMEk';
-const LIVEKIT_URL = 'wss://toy-cymt5c00.livekit.cloud';
+// Configuration - Replace these with your own credentials!
+// Get yours at: https://supabase.com (Supabase) and https://livekit.io (LiveKit)
+const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // e.g., 'https://xxxxx.supabase.co'
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // From Supabase Dashboard → Settings → API
+const LIVEKIT_URL = 'YOUR_LIVEKIT_URL'; // e.g., 'wss://xxxxx.livekit.cloud'
 
 // Initialize Supabase
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
