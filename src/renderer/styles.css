@@ -643,6 +643,580 @@ body {
 }
 
 /* ==========================================
+   GATHERING HUB - OTAĞ DESIGN
+   ========================================== */
+#hub-screen {
+  display: none;
+  position: relative;
+  height: 100vh;
+  background: linear-gradient(to bottom, #0a0a14 0%, #0f1628 40%, #1a2744 100%);
+  overflow: hidden;
+}
+
+#hub-screen.active {
+  display: block;
+}
+
+/* Starry Night Sky */
+.hub-stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(2px 2px at 20px 30px, #fff, transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+    radial-gradient(2px 2px at 160px 120px, rgba(255,255,255,0.9), transparent),
+    radial-gradient(1px 1px at 230px 80px, #fff, transparent),
+    radial-gradient(2px 2px at 300px 150px, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1px 1px at 350px 50px, #fff, transparent),
+    radial-gradient(2px 2px at 420px 180px, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 500px 90px, #fff, transparent),
+    radial-gradient(2px 2px at 580px 130px, rgba(255,255,255,0.9), transparent);
+  background-size: 600px 200px;
+  animation: twinkle 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.hub-stars-2 {
+  background-image: 
+    radial-gradient(1px 1px at 50px 100px, #fff, transparent),
+    radial-gradient(2px 2px at 120px 40px, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1px 1px at 200px 160px, #fff, transparent),
+    radial-gradient(2px 2px at 280px 90px, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 380px 140px, #fff, transparent),
+    radial-gradient(2px 2px at 450px 60px, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 520px 180px, #fff, transparent);
+  background-size: 550px 220px;
+  animation: twinkle 12s ease-in-out infinite reverse;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+/* Orbit Container for Floating Toys */
+.hub-orbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 600px;
+  height: 600px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* Floating Toy Bubbles */
+.toy-bubble {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(circle at 30% 30%, rgba(201, 162, 39, 0.4), rgba(139, 90, 43, 0.6));
+  border: 2px solid rgba(201, 162, 39, 0.5);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 0.3s ease;
+  animation: float 6s ease-in-out infinite;
+  box-shadow: 
+    0 0 20px rgba(201, 162, 39, 0.3),
+    inset 0 0 15px rgba(255, 200, 100, 0.2);
+}
+
+.toy-bubble:hover {
+  transform: scale(1.15);
+  border-color: var(--altyn-gold);
+  box-shadow: 
+    0 0 40px rgba(201, 162, 39, 0.6),
+    inset 0 0 20px rgba(255, 200, 100, 0.4);
+}
+
+.toy-bubble:hover .toy-bubble-name {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toy-bubble-icon {
+  font-size: 28px;
+}
+
+.toy-bubble-name {
+  position: absolute;
+  bottom: -28px;
+  font-size: 11px;
+  color: var(--altyn-gold);
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: all 0.3s ease;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+/* Position bubbles in orbit */
+.toy-bubble:nth-child(1) { top: 5%; left: 50%; transform: translateX(-50%); animation-delay: 0s; }
+.toy-bubble:nth-child(2) { top: 20%; right: 8%; animation-delay: 1s; }
+.toy-bubble:nth-child(3) { top: 50%; right: -5%; transform: translateY(-50%); animation-delay: 2s; }
+.toy-bubble:nth-child(4) { bottom: 20%; right: 8%; animation-delay: 3s; }
+.toy-bubble:nth-child(5) { bottom: 5%; left: 50%; transform: translateX(-50%); animation-delay: 4s; }
+.toy-bubble:nth-child(6) { bottom: 20%; left: 8%; animation-delay: 5s; }
+.toy-bubble:nth-child(7) { top: 50%; left: -5%; transform: translateY(-50%); animation-delay: 1.5s; }
+.toy-bubble:nth-child(8) { top: 20%; left: 8%; animation-delay: 2.5s; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.toy-bubble:nth-child(1):hover,
+.toy-bubble:nth-child(5):hover { transform: translateX(-50%) scale(1.15); }
+.toy-bubble:nth-child(3):hover,
+.toy-bubble:nth-child(7):hover { transform: translateY(-50%) scale(1.15); }
+
+/* Central Otağ */
+.hub-otag {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 320px;
+  height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Otağ Warm Glow */
+.otag-glow {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255, 180, 80, 0.15) 0%, rgba(201, 162, 39, 0.05) 40%, transparent 70%);
+  border-radius: 50%;
+  animation: glow-pulse 4s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+}
+
+/* Otağ Body (Yurt Shape) */
+.otag-body {
+  position: absolute;
+  width: 260px;
+  height: 200px;
+  bottom: 60px;
+}
+
+.otag-roof {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 140px solid transparent;
+  border-right: 140px solid transparent;
+  border-bottom: 80px solid rgba(139, 90, 43, 0.3);
+  filter: drop-shadow(0 0 20px rgba(201, 162, 39, 0.3));
+}
+
+.otag-roof::after {
+  content: '';
+  position: absolute;
+  top: 80px;
+  left: -130px;
+  width: 260px;
+  height: 120px;
+  background: linear-gradient(to bottom, rgba(201, 162, 39, 0.2), rgba(255, 180, 80, 0.4));
+  border-radius: 0 0 130px 130px / 0 0 40px 40px;
+  border: 2px solid rgba(201, 162, 39, 0.3);
+  border-top: none;
+  box-shadow: 
+    inset 0 0 40px rgba(255, 180, 80, 0.3),
+    0 0 30px rgba(255, 180, 80, 0.2);
+}
+
+.otag-door {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 70px;
+  background: linear-gradient(to bottom, rgba(255, 200, 100, 0.6), rgba(255, 150, 50, 0.8));
+  border-radius: 25px 25px 0 0;
+  box-shadow: 
+    0 0 30px rgba(255, 180, 80, 0.5),
+    inset 0 0 15px rgba(255, 255, 200, 0.3);
+}
+
+/* Otağ Content */
+.otag-content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: 20px;
+}
+
+.otag-title {
+  font-family: var(--font-display);
+  font-size: 52px;
+  color: var(--altyn-gold);
+  letter-spacing: 0.25em;
+  margin: 0;
+  text-shadow: 
+    0 0 30px rgba(201, 162, 39, 0.5),
+    0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.otag-subtitle {
+  color: rgba(255, 200, 150, 0.8);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin: 8px 0 30px 0;
+}
+
+/* Otağ Buttons */
+.otag-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.otag-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  min-width: 180px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(201, 162, 39, 0.4);
+  border-radius: 25px;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+.otag-btn:hover {
+  background: rgba(201, 162, 39, 0.2);
+  border-color: var(--altyn-gold);
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(201, 162, 39, 0.3);
+}
+
+.otag-btn-primary {
+  background: linear-gradient(135deg, rgba(201, 162, 39, 0.8), rgba(232, 197, 71, 0.9));
+  border-color: var(--altyn-gold);
+  color: #1a1a2e;
+  font-weight: 600;
+}
+
+.otag-btn-primary:hover {
+  box-shadow: 0 0 30px rgba(201, 162, 39, 0.5);
+}
+
+.otag-btn-icon {
+  font-size: 18px;
+}
+
+/* Bottom User Bar */
+.hub-user-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+}
+
+.hub-user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hub-avatar {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #C9A227, #E8C547);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #1a1a2e;
+  font-size: 16px;
+  box-shadow: 0 0 10px rgba(201, 162, 39, 0.4);
+}
+
+.hub-username {
+  color: #fff;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.hub-user-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.hub-icon-btn {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hub-icon-btn:hover {
+  background: rgba(201, 162, 39, 0.3);
+  border-color: var(--altyn-gold);
+  transform: scale(1.1);
+}
+
+/* Enter Toy Animation - Walking INTO the door */
+#hub-screen {
+  perspective: 1000px;
+}
+
+.hub-entering {
+  animation: zoom-into-door 1s ease-in forwards;
+  transform-origin: center 58%; /* Aligned with the door (center of the Otağ body) */
+}
+
+.hub-entering .otag-content {
+  animation: content-fade 0.4s ease-out forwards;
+}
+
+.hub-entering .hub-orbit {
+  animation: bubbles-fade 0.3s ease-out forwards;
+}
+
+.hub-entering .hub-user-bar {
+  animation: bar-fade 0.3s ease-out forwards;
+}
+
+@keyframes zoom-into-door {
+  0% { 
+    transform: scale(1) translateZ(0);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(4) translateZ(300px);
+    opacity: 1;
+  }
+  100% { 
+    transform: scale(12) translateZ(800px);
+    opacity: 0;
+  }
+}
+
+@keyframes content-fade {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes bubbles-fade {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes bar-fade {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Empty State Text */
+.hub-empty-hint {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* ==========================================
+   TOY MODALS (Create / Join)
+   ========================================== */
+.toy-modal {
+  max-width: 480px;
+}
+
+.toy-modal-header {
+  text-align: center;
+  margin-bottom: var(--space-6);
+}
+
+.toy-modal-header h2 {
+  color: var(--text-primary);
+  font-size: var(--text-2xl);
+  margin-bottom: var(--space-2);
+}
+
+.toy-modal-header p {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.toy-type-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.toy-type-option input {
+  display: none;
+}
+
+.toy-type-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-4);
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: var(--transition-base);
+}
+
+.toy-type-option input:checked + .toy-type-card {
+  border-color: var(--altyn-gold);
+  background: var(--altyn-glow);
+}
+
+.toy-type-card:hover {
+  border-color: var(--altyn-gold);
+}
+
+.toy-type-icon {
+  font-size: var(--text-3xl);
+  margin-bottom: var(--space-2);
+}
+
+.toy-type-name {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+}
+
+.toy-type-desc {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
+
+/* Join Toy Tabs */
+.join-toy-tabs {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  border-bottom: var(--border-subtle);
+  padding-bottom: var(--space-3);
+}
+
+.join-tab {
+  padding: var(--space-2) var(--space-4);
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  transition: var(--transition-base);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -calc(var(--space-3) + 1px);
+}
+
+.join-tab:hover {
+  color: var(--text-primary);
+}
+
+.join-tab.active {
+  color: var(--altyn-gold);
+  border-bottom-color: var(--altyn-gold);
+}
+
+.join-tab-content {
+  display: none;
+}
+
+.join-tab-content.active {
+  display: block;
+}
+
+.public-toys-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.public-toy-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: rgba(255, 255, 255, 0.03);
+  border: var(--border-subtle);
+  border-radius: var(--border-radius-md);
+  margin-bottom: var(--space-2);
+  cursor: pointer;
+  transition: var(--transition-base);
+}
+
+.public-toy-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--altyn-gold);
+}
+
+.public-toy-info {
+  flex: 1;
+}
+
+.public-toy-name {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.public-toy-desc {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
+
+.public-toy-members {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.loading-text {
+  color: var(--text-muted);
+  text-align: center;
+  padding: var(--space-6);
+}
+
+/* ==========================================
    6. MAIN APP CONTAINER
    ========================================== */
 .app-container {
@@ -4595,4 +5169,46 @@ body {
 
 .message-link:hover {
   text-decoration: underline;
+}
+
+/* ==========================================
+   46. TOAST NOTIFICATIONS
+   ========================================== */
+
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 9999;
+  opacity: 0;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast-success {
+  background: linear-gradient(135deg, #2d6b4a, #3d8b5a);
+  color: #fff;
+  border: 1px solid #4a9b6a;
+}
+
+.toast-error {
+  background: linear-gradient(135deg, #8b3d3d, #a64a4a);
+  color: #fff;
+  border: 1px solid #c55a5a;
+}
+
+.toast-info {
+  background: linear-gradient(135deg, #3d5a8b, #4a6a9b);
+  color: #fff;
+  border: 1px solid #5a7aab;
 }

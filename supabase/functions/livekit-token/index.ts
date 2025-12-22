@@ -6,8 +6,9 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { AccessToken } from 'npm:livekit-server-sdk@2.0.0';
 
-const LIVEKIT_API_KEY = Deno.env.get('LIVEKIT_API_KEY') || 'APICPAyJFc5N6yu';
-const LIVEKIT_API_SECRET = Deno.env.get('LIVEKIT_API_SECRET') || 'aqIdclz8vAjmsKApubfxpSFHASBxzn7wPjpUNUY1MsE';
+// These must be set via: supabase secrets set LIVEKIT_API_KEY=xxx LIVEKIT_API_SECRET=xxx
+const LIVEKIT_API_KEY = Deno.env.get('LIVEKIT_API_KEY');
+const LIVEKIT_API_SECRET = Deno.env.get('LIVEKIT_API_SECRET');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

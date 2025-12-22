@@ -22,3 +22,7 @@ Thumbs.db
 # Env files
 .env
 .env.local
+.env.*
+
+# Supabase local files (contains sensitive info)
+supabase/.temp/

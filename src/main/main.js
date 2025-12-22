@@ -61,8 +61,12 @@ function createWindow() {
 
   mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
 
-  // Open DevTools in development
-  // mainWindow.webContents.openDevTools();
+  // Open DevTools in development (F12 or Ctrl+Shift+I)
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.key === 'F12' || (input.control && input.shift && input.key === 'I')) {
+      mainWindow.webContents.toggleDevTools();
+    }
+  });
 
   mainWindow.on('closed', () => {
     mainWindow = null;

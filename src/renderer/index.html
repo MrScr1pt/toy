@@ -64,7 +64,140 @@
     </div>
   </div>
 
-  <!-- Main Chat Screen -->
+  <!-- Gathering Hub Screen (Toy Meydanı) -->
+  <div id="hub-screen" class="screen">
+    <!-- Starry Night Background -->
+    <div class="hub-stars"></div>
+    <div class="hub-stars hub-stars-2"></div>
+    
+    <!-- Floating Toy Bubbles (Servers) -->
+    <div class="hub-orbit" id="hub-orbit">
+      <!-- Toy bubbles will be dynamically added here -->
+    </div>
+    
+    <!-- Central Otağ -->
+    <div class="hub-otag">
+      <div class="otag-glow"></div>
+      <div class="otag-body">
+        <div class="otag-roof"></div>
+        <div class="otag-door"></div>
+      </div>
+      
+      <!-- Content inside the Otağ -->
+      <div class="otag-content">
+        <h1 class="otag-title">TOY</h1>
+        <p class="otag-subtitle">Gathering Ground</p>
+        
+        <div class="otag-actions">
+          <button type="button" id="create-toy-btn" class="otag-btn otag-btn-primary">
+            <span class="otag-btn-icon">🏕️</span>
+            <span>Create Toy</span>
+          </button>
+          <button type="button" id="join-toy-btn" class="otag-btn">
+            <span class="otag-btn-icon">🚪</span>
+            <span>Join Toy</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Bottom User Bar -->
+    <div class="hub-user-bar">
+      <div class="hub-user-info">
+        <div class="hub-avatar" id="hub-avatar">U</div>
+        <span class="hub-username" id="hub-username">Username</span>
+      </div>
+      <div class="hub-user-actions">
+        <button type="button" id="friends-btn" class="hub-icon-btn" title="Friends">👥</button>
+        <button type="button" id="hub-settings-btn" class="hub-icon-btn" title="Settings">⚙️</button>
+        <button type="button" id="hub-logout-btn" class="hub-icon-btn" title="Log Out">🚪</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Toy Modal -->
+  <div id="create-toy-modal" class="modal hidden">
+    <div class="modal-content toy-modal">
+      <div class="toy-modal-header">
+        <h2>🏕️ Create Your Toy</h2>
+        <p>A Toy is your gathering space — a digital otağ for your tribe.</p>
+      </div>
+      
+      <form id="create-toy-form">
+        <div class="form-group">
+          <label for="toy-name">Toy Name</label>
+          <input type="text" id="toy-name" placeholder="Enter a name for your Toy" maxlength="50" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="toy-description">Description</label>
+          <textarea id="toy-description" placeholder="What is this Toy about?" maxlength="200"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Toy Type</label>
+          <div class="toy-type-options">
+            <label class="toy-type-option">
+              <input type="radio" name="toy-type" value="public" checked>
+              <span class="toy-type-card">
+                <span class="toy-type-icon">🌍</span>
+                <span class="toy-type-name">Public</span>
+                <span class="toy-type-desc">Anyone can join</span>
+              </span>
+            </label>
+            <label class="toy-type-option">
+              <input type="radio" name="toy-type" value="private">
+              <span class="toy-type-card">
+                <span class="toy-type-icon">🔒</span>
+                <span class="toy-type-name">Private</span>
+                <span class="toy-type-desc">Invite only</span>
+              </span>
+            </label>
+          </div>
+        </div>
+        
+        <div class="modal-buttons">
+          <button type="submit" class="btn btn-primary">Create Toy</button>
+          <button type="button" id="cancel-create-toy" class="btn btn-ghost">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Join Toy Modal -->
+  <div id="join-toy-modal" class="modal hidden">
+    <div class="modal-content toy-modal">
+      <div class="toy-modal-header">
+        <h2>🚪 Join a Toy</h2>
+        <p>Enter an invite code or browse public Toys.</p>
+      </div>
+      
+      <div class="join-toy-tabs">
+        <button class="join-tab active" data-tab="code">Invite Code</button>
+        <button class="join-tab" data-tab="browse">Browse</button>
+      </div>
+      
+      <div class="join-tab-content active" data-content="code">
+        <div class="form-group">
+          <label for="invite-code">Invite Code</label>
+          <input type="text" id="invite-code" placeholder="Enter invite code">
+        </div>
+        <button id="join-by-code-btn" class="btn btn-primary">Join Toy</button>
+      </div>
+      
+      <div class="join-tab-content" data-content="browse">
+        <div class="public-toys-list" id="public-toys-list">
+          <p class="loading-text">Loading public Toys...</p>
+        </div>
+      </div>
+      
+      <div class="modal-buttons">
+        <button type="button" id="cancel-join-toy" class="btn btn-ghost">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Chat Screen (Inside a Toy) -->
   <div id="chat-screen" class="screen">
     <div class="app-container">
       <!-- Sidebar -->
@@ -119,6 +252,7 @@
             <div class="user-avatar-small" id="user-avatar-small">U</div>
             <span id="current-user">Username</span>
           </button>
+          <button id="back-to-hub-btn" class="btn btn-icon btn-ghost" title="Back to Hub">🏕️</button>
           <button id="logout-btn" class="btn btn-icon btn-ghost" title="Log Out">🚪</button>
         </div>
       </div>

@@ -65,6 +65,10 @@ let activeDMs = []; // List of users we have DMs with
 let currentDM = null; // Currently open DM (username)
 let isInDM = false; // Are we viewing a DM or a channel?
 
+// Toy state
+let currentToy = null; // Currently active Toy (community)
+let userToys = []; // List of Toys user is a member of
+
 // DOM Elements - Auth
 const authScreen = document.getElementById('auth-screen');
 const loginForm = document.getElementById('login-form');
@@ -78,8 +82,26 @@ const signupConfirm = document.getElementById('signup-confirm');
 const loginError = document.getElementById('login-error');
 const signupError = document.getElementById('signup-error');
 
+// DOM Elements - Hub
+const hubScreen = document.getElementById('hub-screen');
+const hubUsername = document.getElementById('hub-username');
+const hubAvatar = document.getElementById('hub-avatar');
+const hubOrbit = document.getElementById('hub-orbit');
+const createToyBtn = document.getElementById('create-toy-btn');
+const joinToyBtn = document.getElementById('join-toy-btn');
+const friendsBtn = document.getElementById('friends-btn');
+const hubLogoutBtn = document.getElementById('hub-logout-btn');
+
+// DOM Elements - Toy Modals
+const createToyModal = document.getElementById('create-toy-modal');
+const createToyForm = document.getElementById('create-toy-form');
+const cancelCreateToy = document.getElementById('cancel-create-toy');
+const joinToyModal = document.getElementById('join-toy-modal');
+const cancelJoinToy = document.getElementById('cancel-join-toy');
+
 // DOM Elements - Chat
 const chatScreen = document.getElementById('chat-screen');
+const backToHubBtn = document.getElementById('back-to-hub-btn');
 const roomNameEl = document.getElementById('room-name');
 const userCountEl = document.getElementById('user-count');
 const usersListEl = document.getElementById('users-list');
@@ -413,9 +435,12 @@ async function handleLogout() {
   isInDM = false;
   currentDM = null;
   activeDMs = [];
+  currentToy = null;
+  userToys = [];
   
-  // Switch to auth screen
+  // Switch to auth screen (from either hub or chat)
   chatScreen.classList.remove('active');
+  hubScreen.classList.remove('active');
   authScreen.classList.add('active');
   
   // Clear form fields
@@ -433,14 +458,109 @@ function hideAuthError(element) {
   element.classList.remove('visible');
 }
 
-// Enter chat after successful auth
+// Enter hub after successful auth (NOT directly to chat)
 async function enterChat() {
-  // Switch screens
+  // Switch to hub screen
   authScreen.classList.remove('active');
+  hubScreen.classList.add('active');
+  
+  // Update hub UI
+  if (hubUsername) hubUsername.textContent = currentUser;
+  if (hubAvatar) hubAvatar.textContent = currentUser.charAt(0).toUpperCase();
+  
+  // Load user's Toys
+  await loadUserToys();
+  
+  // Initialize presence (global, not room-specific)
+  await initializeGlobalPresence();
+}
+
+// Load user's toys (servers they belong to)
+async function loadUserToys() {
+  console.log('Loading toys for user:', currentUserId);
+  
+  if (!currentUserId) {
+    console.error('No user ID - cannot load toys');
+    return;
+  }
+  
+  // Query toys directly that user owns (simpler, avoids RLS issues)
+  const { data: ownedToys, error: ownedError } = await supabaseClient
+    .from('toys')
+    .select('*')
+    .eq('owner_id', currentUserId);
+  
+  if (ownedError) {
+    console.error('Error loading owned toys:', ownedError);
+  }
+  
+  userToys = ownedToys || [];
+  console.log('User toys loaded:', userToys);
+  
+  renderFloatingToys();
+}
+
+// Render floating toy bubbles orbiting the Otağ
+function renderFloatingToys() {
+  if (!hubOrbit) return;
+  hubOrbit.innerHTML = '';
+  
+  if (userToys.length === 0) {
+    // Show hint when no toys
+    const hint = document.createElement('div');
+    hint.className = 'hub-empty-hint';
+    hint.textContent = 'Create or join a Toy to see it orbit here';
+    hubScreen.appendChild(hint);
+    return;
+  }
+  
+  // Remove any existing hint
+  const existingHint = hubScreen.querySelector('.hub-empty-hint');
+  if (existingHint) existingHint.remove();
+  
+  // Only show up to 8 toys in orbit
+  userToys.slice(0, 8).forEach((toy, index) => {
+    const bubble = document.createElement('div');
+    bubble.className = 'toy-bubble';
+    bubble.innerHTML = `
+      <span class="toy-bubble-icon">${toy.icon || '🏕️'}</span>
+      <span class="toy-bubble-name">${toy.name}</span>
+    `;
+    bubble.addEventListener('click', () => enterToyWithAnimation(toy, bubble));
+    hubOrbit.appendChild(bubble);
+  });
+}
+
+// Enter a Toy with animation effect - walking through the door
+function enterToyWithAnimation(toy, bubbleElement) {
+  // Add entering animation to the hub
+  hubScreen.classList.add('hub-entering');
+  
+  // After animation completes, switch to chat
+  setTimeout(() => {
+    hubScreen.classList.remove('hub-entering');
+    enterToy(toy);
+  }, 1100); // Match the animation duration
+}
+
+// Enter a specific Toy (community)
+async function enterToy(toy) {
+  console.log('Entering toy:', toy);
+  
+  if (!toy || !toy.id) {
+    console.error('Invalid toy object:', toy);
+    return;
+  }
+  
+  currentToy = toy;
+  currentRoom = 'general'; // Default channel
+  
+  // Switch from hub to chat screen
+  hubScreen.classList.remove('active');
   chatScreen.classList.add('active');
   
-  // Update UI
-  roomNameEl.textContent = `Room: ${currentRoom}`;
+  // Update UI with TOY name
+  roomNameEl.textContent = `${toy.name} / #${currentRoom}`;
   currentUserEl.textContent = currentUser;
   
   // Update user avatar with initial
@@ -448,7 +568,7 @@ async function enterChat() {
     userAvatarSmall.textContent = currentUser.charAt(0).toUpperCase();
   }
   
-  // Initialize services
+  // Initialize services for this Toy
   await initializePresence();
   await loadMessages();
   subscribeToMessages();
@@ -457,7 +577,176 @@ async function enterChat() {
   subscribeToChannels();
   subscribeToAllDMs();
   
-  addSystemMessage(`Welcome back, ${currentUser}!`);
+  addSystemMessage(`Welcome to ${toy.name}!`);
+}
+
+// Return to hub from chat
+function returnToHub() {
+  // Cleanup subscriptions
+  if (messagesSubscription) {
+    supabaseClient.removeChannel(messagesSubscription);
+    messagesSubscription = null;
+  }
+  
+  // Clear chat
+  messagesEl.innerHTML = '';
+  currentToy = null;
+  
+  // Switch screens
+  chatScreen.classList.remove('active');
+  hubScreen.classList.add('active');
+}
+
+// Initialize global presence (not tied to a specific room)
+async function initializeGlobalPresence() {
+  if (presenceChannel) {
+    await presenceChannel.untrack();
+    supabaseClient.removeChannel(presenceChannel);
+  }
+  
+  presenceChannel = supabaseClient.channel('presence:global', {
+    config: {
+      presence: {
+        key: currentUser,
+      },
+    },
+  });
+  
+  presenceChannel.subscribe(async (status) => {
+    if (status === 'SUBSCRIBED') {
+      await presenceChannel.track({
+        user: currentUser,
+        online_at: new Date().toISOString(),
+      });
+    }
+  });
+}
+
+// Create a new Toy
+async function createToy(name, description, isPublic) {
+  console.log('Creating toy:', { name, description, isPublic, userId: currentUserId });
+  
+  if (!currentUserId) {
+    console.error('No user ID - not logged in');
+    showToast('Error: Not logged in', 'error');
+    return null;
+  }
+  
+  // Check if user already has a toy with this name
+  const { data: existing } = await supabaseClient
+    .from('toys')
+    .select('id')
+    .eq('owner_id', currentUserId)
+    .eq('name', name)
+    .single();
+  
+  if (existing) {
+    showToast(`You already have a Toy named "${name}"`, 'error');
+    return null;
+  }
+  
+  try {
+    const { data: toy, error } = await supabaseClient
+      .from('toys')
+      .insert({
+        name,
+        description,
+        is_public: isPublic,
+        owner_id: currentUserId,
+        icon: '🏕️'
+      })
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error creating toy:', error);
+      showToast(`Error creating Toy: ${error.message}`, 'error');
+      return null;
+    }
+    
+    console.log('Toy created successfully:', toy);
+    
+    // Add creator as member
+    const { error: memberError } = await supabaseClient
+      .from('toy_members')
+      .insert({
+        toy_id: toy.id,
+        user_id: currentUserId,
+        role: 'owner'
+      });
+    
+    if (memberError) {
+      console.error('Error adding member:', memberError);
+    }
+    
+    // Create default general channel
+    const { error: channelError } = await supabaseClient
+      .from('channels')
+      .insert({
+        toy_id: toy.id,
+        name: 'general',
+        type: 'text'
+      });
+    
+    if (channelError) {
+      console.error('Error creating channel:', channelError);
+    }
+    
+    showToast(`Toy "${name}" created!`, 'success');
+    return toy;
+  } catch (err) {
+    console.error('Exception creating toy:', err);
+    showToast(`Error: ${err.message}`, 'error');
+    return null;
+  }
+}
+
+// Show toast notification
+function showToast(message, type = 'info') {
+  // Remove existing toast
+  const existingToast = document.querySelector('.toast');
+  if (existingToast) existingToast.remove();
+  
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  
+  // Animate in
+  setTimeout(() => toast.classList.add('show'), 10);
+  
+  // Remove after 3 seconds
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
+// Join a Toy by invite code
+async function joinToyByCode(code) {
+  // Look up invite
+  const { data: invite, error } = await supabaseClient
+    .from('toy_invites')
+    .select('toy_id')
+    .eq('code', code)
+    .single();
+  
+  if (error || !invite) {
+    return { error: 'Invalid invite code' };
+  }
+  
+  // Add as member
+  await supabaseClient
+    .from('toy_members')
+    .insert({
+      toy_id: invite.toy_id,
+      user_id: currentUserId,
+      role: 'member'
+    });
+  
+  // Reload toys
+  await loadUserToys();
+  return { success: true };
 }
 
 // ==========================================
@@ -465,7 +754,15 @@ async function enterChat() {
 // ==========================================
 
 document.addEventListener('DOMContentLoaded', () => {
-  setupEventListeners();
+  console.log('DOM loaded - starting setup');
+  
+  try {
+    setupEventListeners();
+    console.log('Event listeners set up');
+  } catch (e) {
+    console.error('Error in setupEventListeners:', e);
+  }
+  
   checkExistingSession();
   
   // Listen for auth callbacks while app is running
@@ -508,6 +805,134 @@ function setupEventListeners() {
   // Logout button
   if (logoutBtn) {
     logoutBtn.addEventListener('click', handleLogout);
+  }
+  
+  // Back to hub button
+  if (backToHubBtn) {
+    backToHubBtn.addEventListener('click', returnToHub);
+  }
+  
+  // Hub logout button
+  if (hubLogoutBtn) {
+    hubLogoutBtn.addEventListener('click', handleLogout);
+  }
+  
+  // Hub action buttons
+  if (createToyBtn) {
+    console.log('Create Toy button found');
+    createToyBtn.addEventListener('click', () => {
+      console.log('Create Toy clicked');
+      if (createToyModal) {
+        createToyModal.classList.remove('hidden');
+      }
+    });
+  }
+  
+  if (joinToyBtn) {
+    console.log('Join Toy button found');
+    joinToyBtn.addEventListener('click', () => {
+      console.log('Join Toy clicked');
+      if (joinToyModal) {
+        joinToyModal.classList.remove('hidden');
+      }
+    });
+  }
+  
+  if (cancelCreateToy) {
+    cancelCreateToy.addEventListener('click', () => {
+      createToyModal.classList.add('hidden');
+    });
+  }
+  
+  if (cancelJoinToy) {
+    cancelJoinToy.addEventListener('click', () => {
+      joinToyModal.classList.add('hidden');
+    });
+  }
+  
+  // Create Toy form - handle both form submit and button click
+  const handleCreateToy = async () => {
+    console.log('Create Toy triggered');
+    
+    const name = document.getElementById('toy-name')?.value.trim();
+    const description = document.getElementById('toy-description')?.value.trim() || '';
+    const typeInput = document.querySelector('input[name="toy-type"]:checked');
+    const isPublic = typeInput ? typeInput.value === 'public' : true;
+    
+    console.log('Form values:', { name, description, isPublic });
+    
+    if (!name) {
+      console.log('No name provided');
+      return;
+    }
+    
+    // Disable submit button while creating
+    const submitBtn = createToyForm?.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creating...';
+    }
+    
+    const toy = await createToy(name, description, isPublic);
+    
+    // Re-enable button
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Create Toy';
+    }
+    
+    if (toy) {
+      createToyModal.classList.add('hidden');
+      createToyForm?.reset();
+      await loadUserToys();
+      enterToy(toy);
+    }
+  };
+  
+  if (createToyForm) {
+    createToyForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      handleCreateToy();
+    });
+    
+    // Also add click handler directly to submit button
+    const submitBtn = createToyForm.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        handleCreateToy();
+      });
+    }
+  } else {
+    console.error('createToyForm not found!');
+  }
+  
+  // Join Toy tabs
+  document.querySelectorAll('.join-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const tabName = tab.dataset.tab;
+      document.querySelectorAll('.join-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelectorAll('.join-tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelector(`.join-tab-content[data-content="${tabName}"]`)?.classList.add('active');
+    });
+  });
+  
+  // Join by code
+  const joinByCodeBtn = document.getElementById('join-by-code-btn');
+  if (joinByCodeBtn) {
+    joinByCodeBtn.addEventListener('click', async () => {
+      const code = document.getElementById('invite-code').value.trim();
+      if (!code) return;
+      
+      const result = await joinToyByCode(code);
+      if (result.error) {
+        alert(result.error);
+      } else {
+        joinToyModal.classList.add('hidden');
+        document.getElementById('invite-code').value = '';
+      }
+    });
   }
   
   // Use handleSendMessage which checks for DM mode
@@ -671,18 +1096,18 @@ function updateUsersList(state) {
 // ==========================================
 
 async function loadMessages() {
+  if (!currentToy) {
+    console.error('No current toy - cannot load messages');
+    return;
+  }
+  
   let query = supabaseClient
     .from('messages')
     .select('*')
+    .eq('toy_id', currentToy.id)
+    .eq('room', currentRoom)
     .order('created_at', { ascending: true })
     .limit(50);
-  
-  // For general room, also include messages with no room set (legacy messages)
-  if (currentRoom === 'general') {
-    query = query.or(`room.eq.general,room.eq.General,room.is.null`);
-  } else {
-    query = query.eq('room', currentRoom);
-  }
   
   const { data, error } = await query;
   
@@ -699,15 +1124,17 @@ async function loadMessages() {
 }
 
 function subscribeToMessages() {
+  if (!currentToy) return;
+  
   messagesSubscription = supabaseClient
-    .channel(`messages:${currentRoom}`)
+    .channel(`messages:${currentToy.id}:${currentRoom}`)
     .on(
       'postgres_changes',
       {
         event: 'INSERT',
         schema: 'public',
         table: 'messages',
-        filter: `room=eq.${currentRoom}`,
+        filter: `toy_id=eq.${currentToy.id}`,
       },
       (payload) => {
         displayMessage(payload.new);
@@ -734,6 +1161,7 @@ async function sendMessage() {
   const { error } = await supabaseClient
     .from('messages')
     .insert({
+      toy_id: currentToy?.id,
       room: currentRoom,
       username: currentUser,
       content: text,
